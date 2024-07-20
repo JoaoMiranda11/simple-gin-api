@@ -60,6 +60,44 @@ func (p *productController) GetProductById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, product)
 }
 
+func (p *productController) UpdateProductById(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, model.Response{
+			Message: "Id do produto não pode ser nulo",
+		})
+		return
+	}
+
+	productId, err := strconv.Atoi(id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	var reqProduct model.Product
+	err = ctx.BindJSON(&reqProduct)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	resProduct, err := p.productUsecase.UpdateProductById(productId, reqProduct)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	if resProduct == nil {
+		ctx.JSON(http.StatusNotFound, model.Response{
+			Message: "Produto não encontrado",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resProduct)
+}
+
 func (p *productController) CreateProducts(ctx *gin.Context) {
 	var product model.Product
 	err := ctx.BindJSON(&product)

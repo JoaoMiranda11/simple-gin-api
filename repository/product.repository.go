@@ -40,6 +40,27 @@ func (pr *ProductRepository) GetProductById(id int) (*model.Product, error) {
 	return &product, err
 }
 
+func (pr *ProductRepository) UpdateProductById(id int, product model.Product) (*model.Product, error) {
+	query, err := pr.connection.Prepare("UPDATE product SET name = $1, price = $2 WHERE id = $3 RETURNING id, name, price")
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	defer query.Close()
+
+	err = query.QueryRow(product.Name, product.Price, id).Scan(&product.ID, &product.Name, &product.Price)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return &product, nil
+}
+
 func (pr *ProductRepository) CreateProduct(p model.Product) (int, error) {
 	query, err := pr.connection.Prepare("INSERT INTO " +
 		"product(name, price) " +
