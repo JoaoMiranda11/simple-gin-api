@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  go_api:
+    container_name: go_api
+    image: go-gin-api
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - go_db
+
+  go_db:
+    container_name: go_db
+    image: postgres:12
+    # restart: always
+    # shm_size: 128mb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # networks:
+    #   - postgres-compose-ntw
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    # networks:
+    #   - postgres-compose-ntw
+
+volumes:
+  pgdata: {}
