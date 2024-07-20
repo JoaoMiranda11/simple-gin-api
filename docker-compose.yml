@@ -27,6 +27,7 @@ services:
     #   - postgres-compose-ntw
 
   adminer:
+    container_name: adminer
     image: adminer
     restart: always
     ports:

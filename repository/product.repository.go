@@ -16,6 +16,30 @@ func NewProductRepository(conn *sql.DB) ProductRepository {
 	}
 }
 
+func (pr *ProductRepository) GetProductById(id int) (*model.Product, error) {
+	query, err := pr.connection.Prepare("SELECT " +
+		"id, name, price " +
+		"FROM product " +
+		"WHERE id = $1")
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	var product model.Product
+	err = query.QueryRow(id).Scan(&product.ID, &product.Name, &product.Name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return &product, err
+}
+
 func (pr *ProductRepository) CreateProduct(p model.Product) (int, error) {
 	query, err := pr.connection.Prepare("INSERT INTO " +
 		"product(name, price) " +
